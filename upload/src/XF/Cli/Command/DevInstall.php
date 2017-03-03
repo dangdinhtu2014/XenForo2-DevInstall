@@ -87,12 +87,6 @@ class DevInstall extends Command implements CustomAppCommandInterface
 			}
 		}
 
-		$username = $this->json['users'][1]['username'];
-		$password = $this->json['dev']['password'];
-		$email = $this->json['users'][1]['email'];
-		$title = $this->json['options']['boardTitle'];
-		$url = $this->json['options']['boardUrl'];
-
 		$tables = $data->getTables($db);
 
 		$output->writeln("Creating tables...");
@@ -151,18 +145,15 @@ class DevInstall extends Command implements CustomAppCommandInterface
 		$output->writeln("");
 
 		$installHelper->createInitialUser([
-			'username' => $username,
-			'email' => $email
-		], $password);
-
+			'username' => $username = $this->json['users'][1]['username'],
+			'email' => $email = $this->json['users'][1]['email']
+		], $password = $this->json['dev']['password']);
 		unset($this->json['users'][1]);
 
 		$output->writeln("Seeding data... (Options)");
 		/** @var \XF\Repository\Option $optionRepo */
 		$optionRepo = \XF::repository('XF:Option');
 		$optionRepo->updateOptions($this->json['options']);
-
-		$app->db()->beginTransaction();
 
 		$output->writeln("Seeding data... (Users)");
 		foreach ($this->json['users'] AS $userId => $userSeed)
@@ -179,7 +170,7 @@ class DevInstall extends Command implements CustomAppCommandInterface
 
 			/** @var \XF\Entity\UserAuth $auth */
 			$auth = $user->getRelationOrDefault('Auth');
-			$auth->setPassword($this->json['dev']['password']);
+			$auth->setPassword($password);
 
 			$user->save();
 		}
@@ -200,6 +191,22 @@ class DevInstall extends Command implements CustomAppCommandInterface
 			$creator->save();
 		}
 
+		$output->writeln("Seeding data... (Posts)");
+		foreach ($this->json['posts'] AS $post)
+		{
+			$thread = $app->em()->find('XF:Thread', $post['thread_id']);
+			$user = $app->em()->find('XF:User', $post['user_id']);
+
+			\XF::setVisitor($user);
+
+			/** @var \XF\Service\Thread\Replier $replier */
+			$replier = $app->service('XF:Thread\Replier', $thread);
+
+			$replier->setMessage($post['message']);
+			$replier->setUser($user);
+			$replier->save();
+		}
+
 		$output->writeln("Seeding data... (Profile Posts)");
 		foreach ($this->json['profile_posts'] AS $profilePost)
 		{
@@ -215,8 +222,6 @@ class DevInstall extends Command implements CustomAppCommandInterface
 			$entity->save();
 		}
 
-		$app->db()->commit();
-
 		$installHelper->completeInstallation();
 
 		$output->writeln("");
@@ -226,8 +231,8 @@ class DevInstall extends Command implements CustomAppCommandInterface
 		$output->writeln("\t* Username: $username");
 		$output->writeln("\t* Email: $email");
 		$output->writeln("\t* Password: " . str_repeat('*', strlen($password)) . ' (Confirmed)');
-		$output->writeln("\t* Title: $title");
-		$output->writeln("\t* URL: $url");
+		$output->writeln("\t* Title: " . $this->json['options']['boardTitle']);
+		$output->writeln("\t* URL: " . $this->json['options']['boardUrl']);
 
 		return 0;
 	}
