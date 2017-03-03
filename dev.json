@@ -1,0 +1,48 @@
+{
+  "options": {
+    "boardTitle": "XenForo",
+    "boardUrl": "http://localhost",
+    "contactEmailAddress": "webmaster@example.com",
+    "defaultEmailAddress": "webmaster@example.com"
+  },
+
+  "users": {
+    "1": {
+      "username": "NixFifty",
+      "email": "nixfifty@example.com"
+    },
+    "2": {
+      "username": "NixSixty",
+      "email": "user@example.com"
+    }
+  },
+
+  "threads": {
+    "1": {
+      "title": "Hello, world!",
+      "message": "My name is Nix",
+      "user_id": "1",
+      "forum_id": "2"
+    }
+  },
+
+  "posts": {
+    "1": {
+      "message": "No, my name is Nix",
+      "user_id": "1",
+      "thread_id": "2"
+    }
+  },
+
+  "profile_posts": {
+    "1": {
+      "profile_user_id": "1",
+      "user_id": "1",
+      "message": "hello, its me"
+    }
+  },
+
+  "dev": {
+    "password": "12345"
+  }
+}
