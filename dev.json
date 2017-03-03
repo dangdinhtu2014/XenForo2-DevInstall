@@ -29,8 +29,8 @@
   "posts": {
     "1": {
       "message": "No, my name is Nix",
-      "user_id": "1",
-      "thread_id": "2"
+      "user_id": "2",
+      "thread_id": "1"
     }
   },
 
